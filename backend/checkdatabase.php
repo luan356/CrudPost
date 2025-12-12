@@ -1,11 +1,5 @@
 <?php
+$pdo = require __DIR__ . '/src/Config/Database.php';
 
-$pdo = require __DIR__ . '/src/Config/database.php';
-
-$stmt = $pdo->query("
-    SELECT name 
-    FROM sqlite_master 
-    WHERE type = 'table'
-");
-
-var_dump($stmt->fetchAll());
+$tables = $pdo->query("SELECT name FROM sqlite_master WHERE type='table'")->fetchAll(PDO::FETCH_ASSOC);
+print_r($tables);

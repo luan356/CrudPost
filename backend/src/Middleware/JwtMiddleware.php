@@ -10,32 +10,44 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 class JwtMiddleware
 {
-    public function __invoke(ServerRequestInterface $request, RequestHandlerInterface $handler)
+    public function __invoke(ServerRequestInterface $req, RequestHandlerInterface $handler)
     {
-        $auth = $request->getHeaderLine('Authorization');
+        $authHeader = $req->getHeaderLine('Authorization');
 
-        if (!preg_match('/Bearer\s(\S+)/', $auth, $matches)) {
-            return $this->unauthorized();
+        // Verifica se o header Authorization existe e começa com "Bearer "
+        if (!$authHeader || !str_starts_with($authHeader, 'Bearer ')) {
+            return $this->unauthorized('Token not provided');
         }
 
+        $token = substr($authHeader, 7); // Remove "Bearer "
+
         try {
-            $decoded = JWT::decode(
-                $matches[1],
-                new Key($_ENV['JWT_SECRET'], 'HS256')
-            );
+            // Decodifica o token JWT
+            $decoded = JWT::decode($token, new Key($_ENV['JWT_SECRET'], 'HS256'));
 
-            $request = $request->withAttribute('user_id', $decoded->sub);
-            return $handler->handle($request);
+            // Injeta o user_id no request
+            $req = $req->withAttribute('user_id', $decoded->sub);
+    var_dump($decoded);
+            // Passa o request adiante para o próximo middleware ou rota
+            return $handler->handle($req);
 
+        } catch (\Firebase\JWT\ExpiredException $e) {
+            return $this->unauthorized('Token expired');
+        } catch (\Firebase\JWT\SignatureInvalidException $e) {
+            return $this->unauthorized('Invalid token signature');
         } catch (\Throwable $e) {
-            return $this->unauthorized();
+            return $this->unauthorized('Invalid token');
         }
     }
 
-    private function unauthorized()
+    // Cria a resposta 401 Unauthorized
+    private function unauthorized(string $message = 'Unauthorized'): Response
     {
-        $res = new Response();
-        $res->getBody()->write(json_encode(['error' => 'Unauthorized']));
-        return $res->withStatus(401)->withHeader('Content-Type', 'application/json');
+        $response = new Response();
+        $response->getBody()->write(json_encode(['error' => $message]));
+
+        return $response
+            ->withStatus(401)
+            ->withHeader('Content-Type', 'application/json');
     }
 }

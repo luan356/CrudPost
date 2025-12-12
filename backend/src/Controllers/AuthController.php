@@ -1,8 +1,8 @@
 <?php
-
 namespace App\Controllers;
 
 use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 use Slim\Psr7\Response;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -10,20 +10,11 @@ class AuthController
 {
     public function register(ServerRequestInterface $request, Response $response)
     {
-        $data = $request->getParsedBody() ?? [];
-
-        if (
-            empty($data['name']) ||
-            empty($data['email']) ||
-            empty($data['password'])
-        ) {
-            return $this->json($response, ['error' => 'Missing fields'], 400);
-        }
-
+        $data = $request->getParsedBody();
         $pdo = $request->getAttribute('db');
 
-        if (!$pdo) {
-            return $this->json($response, ['error' => 'Database not available'], 500);
+        if (empty($data['name']) || empty($data['email']) || empty($data['password'])) {
+            return $this->json($response, ['error' => 'Missing fields'], 400);
         }
 
         $check = $pdo->prepare("SELECT id FROM users WHERE email = :email");
@@ -49,32 +40,28 @@ class AuthController
 
     public function login(ServerRequestInterface $request, Response $response)
     {
-        $data = $request->getParsedBody() ?? [];
+        $data = $request->getParsedBody();
+        $pdo = $request->getAttribute('db');
 
         if (empty($data['email']) || empty($data['password'])) {
             return $this->json($response, ['error' => 'Missing credentials'], 400);
         }
 
-        $pdo = $request->getAttribute('db');
-
-        $stmt = $pdo->prepare("
-            SELECT id, password 
-            FROM users 
-            WHERE email = :email
-        ");
+        $stmt = $pdo->prepare("SELECT id, password FROM users WHERE email = :email");
         $stmt->execute(['email' => $data['email']]);
-
         $user = $stmt->fetch();
 
         if (!$user || !password_verify($data['password'], $user['password'])) {
             return $this->json($response, ['error' => 'Invalid credentials'], 401);
         }
 
-        $token = JWT::encode([
+        $payload = [
             'sub' => $user['id'],
             'iat' => time(),
-            'exp' => time() + 86400
-        ], $_ENV['JWT_SECRET'], 'HS256');
+            'exp' => time() + 60*60*24
+        ];
+
+        $token = JWT::encode($payload, $_ENV['JWT_SECRET'], 'HS256');
 
         return $this->json($response, ['token' => $token]);
     }
@@ -82,7 +69,6 @@ class AuthController
     private function json(Response $response, array $data, int $status = 200)
     {
         $response->getBody()->write(json_encode($data));
-        return $response->withStatus($status)
-                        ->withHeader('Content-Type', 'application/json');
+        return $response->withHeader('Content-Type', 'application/json')->withStatus($status);
     }
 }

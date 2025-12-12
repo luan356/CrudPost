@@ -5,34 +5,21 @@ use Dotenv\Dotenv;
 
 require __DIR__ . '/../vendor/autoload.php';
 
-$app = AppFactory::create();
-$app->addBodyParsingMiddleware();
-
-// Load .env
 $dotenv = Dotenv::createImmutable(__DIR__ . '/../');
 $dotenv->load();
 
-// CORS
+$app = AppFactory::create();
+$app->addBodyParsingMiddleware();
+
+// PDO via middleware
 $app->add(function ($request, $handler) {
-    $response = $handler->handle($request);
-    return $response
-        ->withHeader('Access-Control-Allow-Origin', '*')
-        ->withHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
-        ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    $pdo = require __DIR__ . '/../src/Config/database.php';
+    return $handler->handle(
+        $request->withAttribute('db', $pdo)
+    );
 });
 
-// Create PDO and share via middleware
-$app->add(function ($request, $handler) {
-$pdo = new PDO('sqlite:' . __DIR__ . '/../database.sqlite');
-$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-$pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-
-    // inject PDO into request
-    $request = $request->withAttribute('db', $pdo);
-    return $handler->handle($request);
-});
-
-// Load routes
-(require __DIR__ . '/../Routes.php')($app);
+// Routes
+(require __DIR__ . '/../src/Routes/api.php')($app);
 
 $app->run();
