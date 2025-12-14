@@ -29,8 +29,7 @@ class PostController
     ");
 
     $stmt->execute(['id' => $args['id']]);
-    $post = $stmt->fetch();
-
+    $post = $stmt->fetch(\PDO::FETCH_ASSOC); 
     if (!$post) {
         return $this->json($response, ['error' => 'Post not found'], 404);
     }
@@ -53,7 +52,12 @@ class PostController
         ORDER BY posts.created_at DESC
     ");
 
-    return $this->json($response, $stmt->fetchAll());
+
+    
+$posts = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+return $this->json($response, $posts);
+
 }
     public function create(ServerRequestInterface $request, Response $response)
     {
