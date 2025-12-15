@@ -16,9 +16,9 @@ O frontend faz requisições para a API do backend. Se apenas um deles estiver a
 **Sempre inicie primeiro o backend e depois o frontend.**
 
 **Usuario de teste**
-  "name": "Luan",
-  "email": "luan@opovo.com",
-  "password": "123456"
+  - "name": "Luan",
+ -  "email": "luan@opovo.com",
+  - "password": "123456"
 
 
 
