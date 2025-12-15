@@ -1,0 +1,22 @@
+# Geral
+.git
+.gitignore
+.env
+
+# Node
+node_modules
+npm-debug.log
+yarn.lock
+pnpm-lock.yaml
+
+# Frontend build
+frontend/node_modules
+frontend/dist
+frontend/build
+
+# Backend
+backend/vendor
+
+# OS
+.DS_Store
+Thumbs.db
