@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api, { setToken } from "../api/api";
+import NavButtons from "../components/NavButtons";
 
-export default function Login({ setAuthToken }) {
+export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -12,14 +13,13 @@ export default function Login({ setAuthToken }) {
   const handleLogin = async () => {
     setLoading(true);
     setError("");
+
     try {
       const res = await api.post("/auth/login", { email, password });
-
       const token = res.data.token;
 
       localStorage.setItem("token", token);
       setToken(token);
-      setAuthToken(token); // 🔥 ISSO FAZ O APP RE-RENDERIZAR
 
       navigate("/");
     } catch (err) {
@@ -30,27 +30,31 @@ export default function Login({ setAuthToken }) {
   };
 
   return (
-    <div>
-      <h1>Login</h1>
+    <div className="container">
+      <div className="card">
+        <NavButtons />
 
-      <input
-        placeholder="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-      />
+        <h1>Login</h1>
 
-      <input
-        type="password"
-        placeholder="Password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
+        <input
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
 
-      <button onClick={handleLogin} disabled={loading}>
-        {loading ? "Loading..." : "Login"}
-      </button>
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
+        <button onClick={handleLogin} disabled={loading}>
+          {loading ? "Entrando..." : "Login"}
+        </button>
+
+        {error && <p className="error">{error}</p>}
+      </div>
     </div>
   );
 }
