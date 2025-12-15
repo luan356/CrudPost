@@ -16,7 +16,7 @@ class PostController
             $posts = $repo->findAll($pdo);
             return $this->json($response, $posts, 200);
         } catch (\Throwable $th) {
-            return $this->json($response, ['error' => 'Something went wrong', 'message' => $th->getMessage()], 500);
+            return $this->json($response, ['error' => 'Algo deu Errado na Fucntion Index', 'message' => $th->getMessage()], 500);
         }
     }
 
@@ -27,11 +27,11 @@ class PostController
             $pdo = $request->getAttribute('db');
             $post = $repo->findById($pdo, (int)$args['id']);
             if (!$post) {
-                return $this->json($response, ['error' => 'Post not found'], 404);
+                return $this->json($response, ['error' => 'Postagem não encontrada'], 404);
             }
             return $this->json($response, $post, 200);
         } catch (\Throwable $th) {
-            return $this->json($response, ['error' => 'Something went wrong', 'message' => $th->getMessage()], 500);
+            return $this->json($response, ['error' => 'Algo deu Errado na Fucntion Show', 'message' => $th->getMessage()], 500);
         }
     }
 
@@ -50,7 +50,7 @@ class PostController
             $repo->create($pdo, $data['title'], $data['content'], $userId);
             return $this->json($response, ['message' => 'Post created'], 201);
         } catch (\Throwable $th) {
-            return $this->json($response, ['error' => 'Something went wrong', 'message' => $th->getMessage()], 500);
+            return $this->json($response, ['error' => 'Algo deu Errado na Fucntion create', 'message' => $th->getMessage()], 500);
         }
     }
 
@@ -60,12 +60,12 @@ class PostController
             $data = $request->getParsedBody();
             $repo = new PostRepositories();
             $pdo = $request->getAttribute('db');
-            $userId = $request->getAttribute('user_id'); // JWT
+            $userId = $request->getAttribute('user_id');
             $postId = (int)$args['id'];
 
             $post = $repo->findById($pdo, $postId);
             if (!$post) {
-                return $this->json($response, ['error' => 'Post not found'], 404);
+                return $this->json($response, ['error' => 'Postagem não encontrada'], 404);
             }
 
             if ($post['author_id'] !== $userId) {
@@ -75,7 +75,7 @@ class PostController
             $repo->update($pdo, $postId, $data['title'], $data['content']);
             return $this->json($response, ['message' => 'Post updated'], 200);
         } catch (\Throwable $th) {
-            return $this->json($response, ['error' => 'Something went wrong', 'message' => $th->getMessage()], 500);
+            return $this->json($response, ['error' => 'Algo deu Errado na Fucntion Update', 'message' => $th->getMessage()], 500);
         }
     }
 
@@ -84,12 +84,12 @@ class PostController
         try {
             $repo = new PostRepositories();
             $pdo = $request->getAttribute('db');
-            $userId = $request->getAttribute('user_id'); // JWT
+            $userId = $request->getAttribute('user_id'); 
             $postId = (int)$args['id'];
 
             $post = $repo->findById($pdo, $postId);
             if (!$post) {
-                return $this->json($response, ['error' => 'Post not found'], 404);
+                return $this->json($response, ['error' => 'Postagem não encontrada'], 404);
             }
 
             if ($post['author_id'] !== $userId) {
@@ -99,7 +99,7 @@ class PostController
             $repo->delete($pdo, $postId);
             return $this->json($response, ['message' => 'Post deleted'], 200);
         } catch (\Throwable $th) {
-            return $this->json($response, ['error' => 'Something went wrong', 'message' => $th->getMessage()], 500);
+            return $this->json($response, ['error' => 'Algo deu Errado na Fucntion Delete', 'message' => $th->getMessage()], 500);
         }
     }
 

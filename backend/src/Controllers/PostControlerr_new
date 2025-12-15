@@ -30,12 +30,10 @@ class PostController
         $data = $request->getParsedBody();
         $userId = $request->getAttribute('user_id');
 
-        // Verifica se os campos obrigatórios estão presentes
         if (empty($data['title']) || empty($data['content'])) {
             return $this->json($response, ['error' => 'Title and content are required'], 400);
         }
 
-        // Chama o repositório para criar o post
         try {
             $repo->create($data['title'], $data['content'], $userId);
             return $this->json($response, ['message' => 'Post created'], 201);
@@ -50,20 +48,16 @@ class PostController
         $userId = $request->getAttribute('user_id');
         $postId = (int)$args['id'];
 
-        // Busca o post
         $post = $repo->findById($postId);
 
-        // Verifica se o post existe
         if (!$post) {
             return $this->json($response, ['error' => 'Post not found'], 404);
         }
 
-        // Verifica se o usuário é o autor
         if ($post['author_id'] !== $userId) {
             return $this->json($response, ['error' => 'Unauthorized'], 403);
         }
 
-        // Atualiza o post
         try {
             $repo->update($postId, $data['title'], $data['content']);
             return $this->json($response, ['message' => 'Post updated']);
@@ -77,20 +71,16 @@ class PostController
         $userId = $request->getAttribute('user_id');
         $postId = (int)$args['id'];
 
-        // Busca o post
         $post = $repo->findById($postId);
 
-        // Verifica se o post existe
         if (!$post) {
             return $this->json($response, ['error' => 'Post not found'], 404);
         }
 
-        // Verifica se o usuário é o autor
         if ($post['author_id'] !== $userId) {
             return $this->json($response, ['error' => 'Unauthorized'], 403);
         }
 
-        // Exclui o post
         try {
             $repo->delete($postId);
             return $this->json($response, ['message' => 'Post deleted']);
