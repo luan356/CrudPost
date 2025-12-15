@@ -1,50 +1,78 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
-import api, { setToken } from "../api/api";
+import { useNavigate, useParams } from "react-router-dom";
+import api from "../api/api";
 
 export default function PostDetail() {
-  const { id } = useParams(); // pega o :id da URL
+  const { id } = useParams();
   const navigate = useNavigate();
-
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    setToken(token);
-
     api.get(`/posts/${id}`)
       .then(res => setPost(res.data))
-      .catch(err => {
-        setError(err.response?.data?.error || "Erro ao carregar post");
-      })
+      .catch(() => setError("Erro ao carregar post"))
       .finally(() => setLoading(false));
   }, [id]);
 
   const handleDelete = async () => {
-    if (!window.confirm("Tem certeza que deseja excluir este post?")) return;
+    if (!window.confirm("Deseja realmente excluir este post?")) return;
 
     try {
       await api.delete(`/posts/${id}`);
       navigate("/");
     } catch (err) {
-      alert(err.response?.data?.error || "Erro ao excluir post");
+      setError(err.response?.data?.error || "Erro ao excluir post");
     }
   };
 
-  if (loading) return <p>Carregando...</p>;
-  if (error) return <p style={{ color: "red" }}>{error}</p>;
+  if (loading) {
+    return (
+      <div className="container">
+        <div className="card">Carregando...</div>
+      </div>
+    );
+  }
+
+  if (!post) {
+    return (
+      <div className="container">
+        <div className="card">Post não encontrado</div>
+      </div>
+    );
+  }
 
   return (
-    <div>
-      <h1>{post.title}</h1>
-      <p><strong>Autor:</strong> {post.author}</p>
-      <p>{post.content}</p>
+    <div className="container">
+      <div className="card" style={{ maxWidth: "600px" }}>
+        <h1>{post.title}</h1>
+        <p>{post.content}</p>
 
-      <Link to={`/posts/edit/${id}`}>Editar</Link>
-      <br />
-      <button onClick={handleDelete}>Excluir</button>
+        {error && <p className="error">{error}</p>}
+
+        <div className="actions">
+          <button
+            className="secondary"
+            onClick={() => navigate(-1)}
+          >
+            Voltar
+          </button>
+
+          <button
+            onClick={() => navigate(`/posts/edit/${id}`)}
+          >
+            Editar
+          </button>
+
+          <button
+            className="danger"
+            onClick={handleDelete}
+          >
+            Excluir
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

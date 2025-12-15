@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import api, { setToken } from "../api/api";
+import { useNavigate, useParams } from "react-router-dom";
+import api from "../api/api";
 
 export default function PostForm() {
-  const { id } = useParams(); // se existir, é edição
+  const { id } = useParams();
   const navigate = useNavigate();
 
   const [title, setTitle] = useState("");
@@ -12,9 +12,6 @@ export default function PostForm() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    setToken(token);
-
     if (id) {
       api.get(`/posts/${id}`)
         .then(res => {
@@ -44,26 +41,40 @@ export default function PostForm() {
   };
 
   return (
-    <div>
-      <h1>{id ? "Editar Post" : "Criar Post"}</h1>
+    <div className="container">
+      <div className="card">
+        <h1>{id ? "Editar Post" : "Criar Post"}</h1>
 
-      <input
-        placeholder="Título"
-        value={title}
-        onChange={e => setTitle(e.target.value)}
-      />
+        <input
+          placeholder="Título"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+        />
 
-      <textarea
-        placeholder="Conteúdo"
-        value={content}
-        onChange={e => setContent(e.target.value)}
-      />
+        <textarea
+          placeholder="Conteúdo"
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+        />
 
-      <button onClick={handleSubmit} disabled={loading}>
-        {loading ? "Salvando..." : "Salvar"}
-      </button>
+        {error && <p className="error">{error}</p>}
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
+        <div className="actions">
+          <button
+            className="secondary"
+            onClick={() => navigate(-1)}
+          >
+            Voltar
+          </button>
+
+          <button
+            onClick={handleSubmit}
+            disabled={loading}
+          >
+            {loading ? "Salvando..." : "Salvar"}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

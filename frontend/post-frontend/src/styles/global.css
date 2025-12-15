@@ -115,3 +115,35 @@ button:disabled {
   text-align: center;
   margin-top: 10px;
 }
+
+
+.actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.actions-left {
+  display: flex;
+  gap: 8px;
+}
+
+.actions button {
+  flex: 1;}
+
+.actions .delete {
+  background: #dc2626;
+}
+button.secondary {
+  background: #6b7280;
+}
+
+button.danger {
+  background: #dc2626;
+}
+
+button.danger {
+  background: #dc2626;
+}
+

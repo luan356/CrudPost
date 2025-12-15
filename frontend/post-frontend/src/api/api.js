@@ -1,12 +1,20 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:8000"; 
 const api = axios.create({
-  baseURL: API_URL,
+  baseURL: "http://localhost:8000",
 });
 
 export const setToken = (token) => {
-  api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+  if (token) {
+    api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+  } else {
+    delete api.defaults.headers.common["Authorization"];
+  }
 };
+
+const token = localStorage.getItem("token");
+if (token) {
+  setToken(token);
+}
 
 export default api;
